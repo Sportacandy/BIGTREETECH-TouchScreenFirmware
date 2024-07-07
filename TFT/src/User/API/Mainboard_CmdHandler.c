@@ -146,22 +146,20 @@ void mustStoreScript(const char * format, ...)
   vsnprintf(script, 256, format, va);
   va_end(va);
 
-  char * p = script;
   uint16_t i = 0;
   CMD cmd;
 
-  for (;;)
+  for (char *p = script;; p++)
   {
-    char c = *p++;
-    if (!c) return;
-    cmd[i++] = c;
+    cmd[i++] = *p;
 
-    if (c == '\n')
+    if (*p == '\n' || !*p)
     {
       cmd[i] = 0;
       mustStoreCmd("%s", cmd);
       i = 0;
     }
+    if (!*p) return;
   }
 }
 
