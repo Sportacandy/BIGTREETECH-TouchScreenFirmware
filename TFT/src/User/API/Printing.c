@@ -330,15 +330,15 @@ static void sendPrintCodes(uint8_t index)
   switch (index)
   {
     case 0:
-      mustStoreScript(printcodes.start_gcode);
+      mustStoreCmd(printcodes.start_gcode);
       break;
 
     case 1:
-      mustStoreScript(printcodes.end_gcode);
+      mustStoreCmd(printcodes.end_gcode);
       break;
 
     case 2:
-      mustStoreScript(printcodes.cancel_gcode);
+      mustStoreCmd(printcodes.cancel_gcode);
       break;
 
     default:
