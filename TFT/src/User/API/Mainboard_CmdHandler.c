@@ -88,6 +88,12 @@ static void commonStoreCmd(GCODE_QUEUE * pQueue, const char * format, va_list va
 {
   vsnprintf(pQueue->queue[pQueue->index_w].gcode, CMD_MAX_SIZE, format, va);
 
+  int len = strlen(pQueue->queue[pQueue->index_w].gcode);
+  if (len > 0 && pQueue->queue[pQueue->index_w].gcode[len-1] != '\n') {
+    pQueue->queue[pQueue->index_w].gcode[len] = '\n';
+    pQueue->queue[pQueue->index_w].gcode[len+1] = 0;
+  }
+
   pQueue->queue[pQueue->index_w].port_index = PORT_1;  // port index for SERIAL_PORT
   pQueue->index_w = (pQueue->index_w + 1) % CMD_QUEUE_SIZE;
   pQueue->count++;
@@ -146,18 +152,26 @@ void mustStoreScript(const char * format, ...)
   vsnprintf(script, 256, format, va);
   va_end(va);
 
+  bool leader = true;
   uint16_t i = 0;
   CMD cmd;
 
   for (char *p = script;; p++)
   {
-    cmd[i++] = *p;
-
-    if (*p == '\n' || !*p)
+    if (*p != '\n' && *p) {
+      if ((*p == ' ' || *p == '\t') && leader) {
+        continue;
+      }
+      cmd[i++] = *p;
+      leader = false;
+    }
+    else if (i > 0)
     {
+      cmd[i++] = '\n';
       cmd[i] = 0;
       mustStoreCmd("%s", cmd);
       i = 0;
+      leader = true;
     }
     if (!*p) return;
   }
